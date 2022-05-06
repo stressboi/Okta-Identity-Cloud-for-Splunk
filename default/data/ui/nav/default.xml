@@ -4,4 +4,5 @@
 <view name="inputs" label="Inputs" />
 <view name="reports" label="Okta Stats" />
 <view name="health" label="Add-On Health" />
+  <view name="adminsecurity" label="Admin Security" />
 </nav>
