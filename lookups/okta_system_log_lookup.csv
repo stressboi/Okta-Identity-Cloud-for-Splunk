@@ -307,7 +307,7 @@ release_note_date,smushed_event_type,format_event_type,legacy_event_types,admin_
 2019.03.4,eventhookcreated,event_hook.created,"platform.event_hook.created
 ",1,1,Triggered when an event hook has been created. Used to notify admins that an event hook has been created. When triggered this events contains information about the created event hook.,event-hook,,
 2019.03.4,eventhookdeactivated,event_hook.deactivated,"platform.event_hook.deactivated
-",1,0,Triggered when an event hook has been deactivated. Used to notify admins that an event hook has been deactivated. When triggered this events contains information about the deactivated event hook.,event-hook,,"Indicates that a push notification service has been updated. The notification service enables push notification as an authentication option through Okta to a push provider such as the Apple Push Notification service or the Google Firebase Cloud Messaging service. You can use this event to verify when a notification service was updated for a custom app. When triggered, a push notification service is updated in the Admin Console."
+",1,0,Triggered when an event hook has been deactivated. Used to notify admins that an event hook has been deactivated. When triggered this events contains information about the deactivated event hook.,event-hook,,
 2019.03.4,eventhookdeleted,event_hook.deleted,"platform.event_hook.deleted
 ",1,1,Triggered when an event hook has been deleted. Used to notify admins that an event hook has been deleted. When triggered this events contains information about the deleted event hook.,event-hook,,
 2019.03.4,eventhookdelivery,event_hook.delivery,"platform.event_hook.delivered.failure|platform.event_hook.delivered.success
