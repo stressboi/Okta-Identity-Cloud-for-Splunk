@@ -4,6 +4,12 @@ This is an add-on powered by the Splunk Add-on Builder
 
 Download/Install from [splunkbase](https://splunkbase.splunk.com/app/3682/)
 
+1AUG2022
+--------
+
+Added four new system log events to the lookup to cover new events released between versions 2022.06.2 and 2022.07.0.
+
+
 21JUN2022
 --------
 
