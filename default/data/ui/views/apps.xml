@@ -1,0 +1,145 @@
+<form theme="dark">
+  <label>Apps</label>
+  <fieldset submitButton="false">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="tok_user">
+      <label>Select User</label>
+      <choice value="*">All</choice>
+      <prefix>user="</prefix>
+      <suffix>"</suffix>
+      <initialValue>*</initialValue>
+      <fieldForLabel>user</fieldForLabel>
+      <fieldForValue>user</fieldForValue>
+      <search>
+        <query>index=main sourcetype="OktaIM2:user" | stats count by user | dedup user</query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+      <default>*</default>
+    </input>
+    <input type="checkbox" token="inc_okta" searchWhenChanged="true">
+      <label></label>
+      <choice value="show">Include Okta Apps</choice>
+      <change>
+        <condition label="Include Okta Apps">
+          <set token="inc_okta">app=*</set>
+        </condition>
+        <condition>
+          <set token="inc_okta">app!=Okta*</set>
+        </condition>
+      </change>
+      <delimiter> </delimiter>
+      <initialValue>Okta*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Most Accessed App</title>
+      <single>
+        <search>
+          <query>index=main sourcetype="OktaIM2:log" (eventType="user.authentication.sso" OR eventType="user.session.start") app!="Okta*" $tok_user$ | top app | head 1</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top Apps</title>
+      <table>
+        <search>
+          <query>index=main sourcetype="OktaIM2:log" (eventType="user.authentication.sso" OR eventType="user.session.start") $inc_okta$ $tok_user$ | top 10 app</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Top Apps</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype="OktaIM2:log" (eventType="user.authentication.sso" OR eventType="user.session.start") $inc_okta$ $tok_user$ | top 10 app</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Apps Accessed by Geo</title>
+      <map>
+        <search>
+          <query>index=main sourcetype="OktaIM2:log" (eventType="user.authentication.sso" OR eventType="user.session.start") $inc_okta$ $tok_user$|  geostats count latfield=client.geographicalContext.geolocation.lat longfield=client.geographicalContext.geolocation.lon by app</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.choroplethLayer.colorBins">5</option>
+        <option name="mapping.choroplethLayer.colorMode">auto</option>
+        <option name="mapping.choroplethLayer.maximumColor">0xaf575a</option>
+        <option name="mapping.choroplethLayer.minimumColor">0x62b3b2</option>
+        <option name="mapping.choroplethLayer.neutralPoint">0</option>
+        <option name="mapping.choroplethLayer.shapeOpacity">0.75</option>
+        <option name="mapping.choroplethLayer.showBorder">1</option>
+        <option name="mapping.data.maxClusters">100</option>
+        <option name="mapping.legend.placement">bottomright</option>
+        <option name="mapping.map.center">(0,0)</option>
+        <option name="mapping.map.panning">1</option>
+        <option name="mapping.map.scrollZoom">0</option>
+        <option name="mapping.map.zoom">2</option>
+        <option name="mapping.markerLayer.markerMaxSize">50</option>
+        <option name="mapping.markerLayer.markerMinSize">10</option>
+        <option name="mapping.markerLayer.markerOpacity">0.8</option>
+        <option name="mapping.showTiles">1</option>
+        <option name="mapping.tileLayer.maxZoom">7</option>
+        <option name="mapping.tileLayer.minZoom">0</option>
+        <option name="mapping.tileLayer.tileOpacity">1</option>
+        <option name="mapping.type">marker</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <search>
+          <query>index=main sourcetype="OktaIM2:log" (eventType="user.authentication.sso" OR eventType="user.session.start") $inc_okta$ $tok_user$| timechart count by app</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>

@@ -1,0 +1,372 @@
+<form theme="dark">
+  <label>Okta Login Activity</label>
+  <fieldset submitButton="false">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="tok_user">
+      <label>Select User</label>
+      <choice value="*">All</choice>
+      <prefix>actor.alternateId="</prefix>
+      <suffix>"</suffix>
+      <initialValue>*</initialValue>
+      <fieldForLabel>user</fieldForLabel>
+      <fieldForValue>user</fieldForValue>
+      <search>
+        <query>index=main sourcetype="OktaIM2:user" | stats count by user | dedup user</query>
+        <earliest>0</earliest>
+        <latest></latest>
+      </search>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Geographic Login Successes and Failures</title>
+      <map>
+        <search>
+          <query>index=main sourcetype="OktaIM2:log" eventType="user.session.start" (outcome.result="SUCCESS" OR outcome.result="FAILURE") $tok_user$ | geostats count latfield=client.geographicalContext.geolocation.lat longfield=client.geographicalContext.geolocation.lon by outcome.result</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.choroplethLayer.colorBins">5</option>
+        <option name="mapping.choroplethLayer.colorMode">auto</option>
+        <option name="mapping.choroplethLayer.maximumColor">0xaf575a</option>
+        <option name="mapping.choroplethLayer.minimumColor">0x62b3b2</option>
+        <option name="mapping.choroplethLayer.neutralPoint">0</option>
+        <option name="mapping.choroplethLayer.shapeOpacity">0.75</option>
+        <option name="mapping.choroplethLayer.showBorder">1</option>
+        <option name="mapping.data.maxClusters">100</option>
+        <option name="mapping.legend.placement">bottomright</option>
+        <option name="mapping.map.center">(0,0)</option>
+        <option name="mapping.map.panning">1</option>
+        <option name="mapping.map.scrollZoom">0</option>
+        <option name="mapping.map.zoom">2</option>
+        <option name="mapping.markerLayer.markerMaxSize">50</option>
+        <option name="mapping.markerLayer.markerMinSize">10</option>
+        <option name="mapping.markerLayer.markerOpacity">0.8</option>
+        <option name="mapping.showTiles">1</option>
+        <option name="mapping.tileLayer.maxZoom">7</option>
+        <option name="mapping.tileLayer.minZoom">0</option>
+        <option name="mapping.tileLayer.tileOpacity">1</option>
+        <option name="mapping.type">marker</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <search>
+          <query>index=main sourcetype="OktaIM2:log" eventType="user.session.start" $tok_user$ | timechart count by outcome.result</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top Logins</title>
+      <chart>
+        <search>
+          <query>`okta_base_index`  eventType="user.session.start" (outcome.result="SUCCESS")  actor.alternateId="*" | stats count by actor.alternateId | sort -count | eventstats sum(count) as total | eval percent=round(count*100/total,2) | fields - total | rename count as Logins, actor.alternateId as "User", percent as Percent</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Admin Logins</title>
+      <chart>
+        <search>
+          <query>index=main eventType="user.session.access_admin_app"| stats count by actor.alternateId | sort -count | eventstats sum(count) as total | eval percent=round(count*100/total,2) | fields - total | rename count as Logins, actor.alternateId as "User", percent as Percent</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>`okta_base_index`  eventType="user.session.start" (outcome.result="SUCCESS")  actor.alternateId="*" | stats sparkline(count) as history count by actor.alternateId | sort -count | rename actor.alternateId as user</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <search>
+          <query>index=main eventType="user.session.access_admin_app" | stats sparkline(count) as history count by actor.alternateId | sort -count | rename actor.alternateId as user</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Failed Logins</title>
+      <chart>
+        <search>
+          <query>`okta_base_index`  eventType="user.session.start" (outcome.result="FAILURE")  actor.alternateId="*" | stats count by actor.alternateId | sort -count | eventstats sum(count) as total | eval percent=round(count*100/total,2) | fields - total | rename count as Logins, actor.alternateId as "User", percent as Percent</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top IPs</title>
+      <chart>
+        <search>
+          <query>`okta_base_index`  eventType="user.session.start" (outcome.result="SUCCESS")  actor.alternateId="*" | stats count by src_ip | sort -count | eventstats sum(count) as total | eval percent=round(count*100/total,2) | fields - total | rename count as Logins, actor.alternateId as "User", percent as Percent</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>`okta_base_index`  eventType="user.session.start" (outcome.result="FAILURE")  actor.alternateId="*" | stats sparkline(count) as history count by actor.alternateId | sort -count | rename actor.alternateId as user</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <search>
+          <query>`okta_base_index`  eventType="user.session.start" (outcome.result="SUCCESS")  actor.alternateId="*" | stats sparkline(count) as history count by src_ip| iplocation src_ip|fields - City,Region,lat,lon | sort -count | rename actor.alternateId as user</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top OS and Browser Combinations</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype="OktaIM2:log" eventType="user.session.start" actor.alternateId="*" | eval user_os = 'client.userAgent.os' + ":" + 'client.userAgent.browser'  | stats count by user_os | sort -count | eventstats sum(count) as total | eval percent=round(count*100/total,2) | fields - total | rename count as Logins, actor.alternateId as "User", percent as Percent</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Apps</title>
+      <chart>
+        <search>
+          <query>`okta_base_index` sourcetype="OktaIM2:log" eventType="user.authentication.sso" action="success"  | stats count by app | sort -count | eventstats sum(count) as total | eval percent=round(count*100/total,2) | fields - total | rename count as Logins, app as "Applications", percent as Percent</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>index=main sourcetype="OktaIM2:log" eventType="user.session.start" actor.alternateId="*" | eval user_os = 'client.userAgent.os' + ":" + 'client.userAgent.browser'  | stats sparkline(count) as history count by user_os | sort -count | rename user_os as "OS and Browser"</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <search>
+          <query>`okta_base_index` sourcetype="OktaIM2:log" eventType="user.authentication.sso" action="success" | stats sparkline(count) as history count by app | sort -count | rename app as "Application"</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>MFA Authenticators</title>
+      <chart>
+        <search>
+          <query>index=main eventType="user.authentication.auth_via_mfa" | rename target{}.displayName as targetname |eval authenticator=mvindex(targetname, 1) | search authenticator!="Password" | stats count by authenticator | sort -count | eventstats sum(count) as total | eval percent=round(count*100/total,2) | fields - total | rename count as Logins, authenticator as "Authenticator", percent as Percent</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Login Failure Reasons</title>
+      <chart>
+        <search>
+          <query>`okta_base_index` sourcetype="OktaIM2:log" eventType="user.session.start" outcome.result!="SUCCESS" actor.alternateId="*" | stats count by outcome.reason | sort -count | eventstats sum(count) as total | eval percent=round(count*100/total,2) | fields - total | rename count as Logins, outcome.reason as "Reason", percent as Percent</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>index=main eventType="user.authentication.auth_via_mfa" | rename target{}.displayName as targetname |eval authenticator=mvindex(targetname, 1) | search authenticator!="Password"| stats sparkline(count) as history count by authenticator | sort -count | rename authenticator as "Authenticator"</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel>
+      <table>
+        <search>
+          <query>`okta_base_index` sourcetype="OktaIM2:log" eventType="user.session.start" outcome.result!="SUCCESS" actor.alternateId="*" | stats sparkline(count) as history count by outcome.reason | sort -count | rename outcome.reason as Reason</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

@@ -4,5 +4,12 @@
 <view name="inputs" label="Inputs" />
 <view name="reports" label="Okta Stats" />
 <view name="health" label="Add-On Health" />
+<collection label="Beta Dashboards">
+  <view name="overview" label="Overview" />
+  <view name="login_activity" label="Login Activity" />
+  <view name="mfa" label="Multi-Factor Authentication" />
   <view name="adminsecurity" label="Admin Security" />
+  <view name="user_onboarding" label="User Onboarding" />
+  <view name="user_detail" label="User Detail" />
+  </collection>
 </nav>
