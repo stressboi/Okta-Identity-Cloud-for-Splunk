@@ -4,7 +4,7 @@
     <input type="time" token="field1">
       <label></label>
       <default>
-        <earliest>-24h@h</earliest>
+        <earliest>-7d@h</earliest>
         <latest>now</latest>
       </default>
     </input>
@@ -21,8 +21,8 @@
       <fieldForLabel>tags</fieldForLabel>
       <fieldForValue>tags</fieldForValue>
       <search>
-        <query>index=main sourcetype="OktaIM2:log" earliest=$field1.earliest$ latest=$field1.latest$| table event_type_tags| makemv delim="|" event_type_tags | stats values(event_type_tags) as tags | mvexpand tags</query>
-        <earliest>-30d@d</earliest>
+        <query>`okta_base_index` sourcetype="OktaIM2:log" earliest=$field1.earliest$ latest=$field1.latest$ | table event_type_tags| makemv delim="|" event_type_tags | stats values(event_type_tags) as tags | mvexpand tags</query>
+        <earliest>-60d@d</earliest>
         <latest>now</latest>
       </search>
       <delimiter> OR </delimiter>
@@ -41,14 +41,14 @@
     <panel>
       <table>
         <search>
-          <query>index=main sourcetype="OktaIM2:log" $field4$ | table _time,actor.alternateId,displayMessage,eventType,event_type_tags,admin_interest,security_interest,event_type_description | makemv delim="|" event_type_tags | search (($field2$) AND ($field3$)) | rename actor.alternateId as actor, displayMessage as "Display Message", eventType as "Event Type", event_type_tags as "Event Type Tags", admin_interest as "Admin?", security_interest as "Security?" event_type_description as "Description"</query>
+          <query>`okta_base_index` sourcetype="OktaIM2:log" $field4$ | table _time,actor.alternateId,displayMessage,eventType,event_type_tags,admin_interest,security_interest,event_type_description,target_data | makemv delim="|" event_type_tags | search (($field2$) AND ($field3$)) | rename actor.alternateId as actor, displayMessage as "Display Message", eventType as "Event Type", event_type_tags as "Event Type Tags", admin_interest as "Admin?", security_interest as "Security?" event_type_description as "Description"</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
-        <option name="count">20</option>
+        <option name="count">5</option>
         <option name="dataOverlayMode">none</option>
-        <option name="drilldown">none</option>
+        <option name="drilldown">cell</option>
         <option name="percentagesRow">false</option>
         <option name="refresh.display">progressbar</option>
         <option name="rowNumbers">false</option>

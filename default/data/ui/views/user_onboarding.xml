@@ -9,7 +9,7 @@
     </progress>
   </search>
   <search id="base1">
-    <query>`default_index` sourcetype="OktaIM2:user" host="$org1$" | fields *
+    <query>`okta_base_index` sourcetype="OktaIM2:user" host="$org1$" | fields *
      </query>
     <earliest>0</earliest>
     <latest></latest>
@@ -19,7 +19,7 @@
     <input type="dropdown" token="org1" searchWhenChanged="true">
       <label>Organization</label>
       <search>
-        <query>`default_index` | stats count by host | fields - count</query>
+        <query>`okta_base_index` | stats count by host | fields - count</query>
         <earliest>-7d@h</earliest>
         <latest>now</latest>
       </search>

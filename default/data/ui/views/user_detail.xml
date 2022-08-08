@@ -1,8 +1,15 @@
 <form theme="dark">
   <label>User Detail</label>
   <fieldset submitButton="false">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
     <input type="text" token="user">
-      <label>user</label>
+      <label>User</label>
     </input>
   </fieldset>
   <row>
@@ -10,9 +17,9 @@
       <title>User Detail</title>
       <table>
         <search>
-          <query>index=main (actor.alternateId="$user$" OR user="$user$") | table _time,displayMessage,action,outcome.reason</query>
-          <earliest>-24h@h</earliest>
-          <latest>now</latest>
+          <query>`okta_base_index` (actor.alternateId="$user$" OR user="$user$") | table _time,displayMessage,action,outcome.reason</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="count">20</option>

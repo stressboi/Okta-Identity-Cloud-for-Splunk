@@ -1,26 +1,28 @@
-<form theme="dark">
+<dashboard theme="dark">
   <label>MFA</label>
-  <fieldset submitButton="false"></fieldset>
+  <search id="base22">
+    <query>`okta_base_index` eventType=user.mfa.factor.activate outcome.result=SUCCESS | fields *
+     </query>
+    <earliest>0</earliest>
+    <latest></latest>
+    <sampleRatio>1</sampleRatio>
+  </search>
   <row>
     <panel>
       <single>
-        <search>
-          <query>index=main  eventType="user.mfa.factor.activate" "outcome.result"="SUCCESS"| stats dc(outcome.reason) by user | rename dc(outcome.reason) as ttl_per_user  | stats count</query>
-          <earliest>0</earliest>
-          <sampleRatio>1</sampleRatio>
+        <search base="base22">
+          <query>stats dc(outcome.reason) by user | rename dc(outcome.reason) as ttl_per_user  | stats count</query>
         </search>
         <option name="drilldown">none</option>
         <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="refresh.display">progressbar</option>
         <option name="underLabel">TOTAL USERS</option>
       </single>
     </panel>
     <panel>
       <single>
-        <search>
-          <query>index=main  eventType="user.mfa.factor.activate" "outcome.result"="SUCCESS"| stats dc(outcome.reason) by user | rename dc(outcome.reason) as ttl_per_user | eventstats count as total_users | search ttl_per_user &gt;1 | eventstats count as total_mfa_users | eval percentage=total_mfa_users/total_users,percentage=percentage*100,percentage=round(percentage,0) | fields percentage | head 1</query>
-          <earliest>0</earliest>
-          <latest></latest>
-          <sampleRatio>1</sampleRatio>
+        <search base="base22">
+          <query>stats dc(outcome.reason) by user | rename dc(outcome.reason) as ttl_per_user | eventstats count as total_users | search ttl_per_user &gt;1 | eventstats count as total_mfa_users | eval percentage=total_mfa_users/total_users,percentage=percentage*100,percentage=round(percentage,0) | fields percentage | head 1</query>
         </search>
         <option name="drilldown">none</option>
         <option name="rangeColors">["0xdc4e41","0xf1813f","0xf8be34","0x006d9c","0x53a051"]</option>
@@ -32,10 +34,8 @@
     </panel>
     <panel>
       <single>
-        <search>
-          <query>index=main  eventType="user.mfa.factor.activate" "outcome.result"="SUCCESS"| stats dc(outcome.reason) by user | rename dc(outcome.reason) as ttl_per_user | stats avg(ttl_per_user) as avg | eval avg=round(avg,0)</query>
-          <earliest>0</earliest>
-          <sampleRatio>1</sampleRatio>
+        <search base="base22">
+          <query>stats dc(outcome.reason) by user | rename dc(outcome.reason) as ttl_per_user | stats avg(ttl_per_user) as avg | eval avg=round(avg,0)</query>
         </search>
         <option name="drilldown">none</option>
         <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
@@ -47,11 +47,8 @@
     <panel>
       <title>Enrollment By Authenticator Type</title>
       <chart>
-        <search>
-          <query>index=main  eventType="user.mfa.factor.activate" "outcome.result"="SUCCESS"| stats values(outcome.reason) as authenticators by user | mvexpand authenticators | rex field=authenticators "User set up (?&lt;factor&gt;.+) factor"  | stats count by factor | sort -count | eval myfactor=case(factor=="SIGNED_NONCE","OKTA_VERIFY",factor=="OKTA_VERIFY_PUSH","OKTA_VERIFY",factor=="OKTA_SOFT_TOKEN","OKTA_VERIFY",1=1,factor) | dedup myfactor | eval factor=myfactor | fields - myfactor</query>
-          <earliest>0</earliest>
-          <latest></latest>
-          <sampleRatio>1</sampleRatio>
+        <search base="base22">
+          <query>stats values(outcome.reason) as authenticators by user | mvexpand authenticators | rex field=authenticators "User set up (?&lt;factor&gt;.+) factor"  | stats count by factor | sort -count | eval myfactor=case(factor=="SIGNED_NONCE","OKTA_VERIFY",factor=="OKTA_VERIFY_PUSH","OKTA_VERIFY",factor=="OKTA_SOFT_TOKEN","OKTA_VERIFY",1=1,factor) | dedup myfactor | eval factor=myfactor | fields - myfactor</query>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
@@ -90,11 +87,8 @@
     <panel>
       <title>Users by Authenticator Count</title>
       <chart>
-        <search>
-          <query>index=main  eventType="user.mfa.factor.activate" "outcome.result"="SUCCESS"| stats values(outcome.reason) as authenticators by user | mvexpand authenticators | rex field=authenticators "User set up (?&lt;factor&gt;.+) factor" | eval myfactor=case(factor=="SIGNED_NONCE","OKTA_VERIFY",factor=="OKTA_VERIFY_PUSH","OKTA_VERIFY",factor=="OKTA_SOFT_TOKEN","OKTA_VERIFY",1=1,factor) | stats dc(myfactor) as total_factors by user | stats count by total_factors</query>
-          <earliest>0</earliest>
-          <latest></latest>
-          <sampleRatio>1</sampleRatio>
+        <search base="base22">
+          <query>stats values(outcome.reason) as authenticators by user | mvexpand authenticators | rex field=authenticators "User set up (?&lt;factor&gt;.+) factor" | eval myfactor=case(factor=="SIGNED_NONCE","OKTA_VERIFY",factor=="OKTA_VERIFY_PUSH","OKTA_VERIFY",factor=="OKTA_SOFT_TOKEN","OKTA_VERIFY",1=1,factor) | stats dc(myfactor) as total_factors by user | stats count by total_factors</query>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
@@ -131,7 +125,7 @@
       </chart>
     </panel>
   </row>
-  <row>
+   <row>
     <panel>
       <title>Authenticators In Use</title>
       <input type="time" token="field1">
@@ -143,7 +137,7 @@
       </input>
       <chart>
         <search>
-          <query>index=main eventType="user.authentication.auth_via_mfa" | rename target{}.displayName as targetname |eval authenticator=mvindex(targetname, 1) | search authenticator!="Password"| timechart count by authenticator | rename Phone as SMS</query>
+          <query>`okta_base_index` eventType="user.authentication.auth_via_mfa" | rename target{}.displayName as targetname |eval authenticator=mvindex(targetname, 1) | search authenticator!="Password"| timechart count by authenticator | rename Phone as SMS</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -189,7 +183,7 @@
       <chart>
         <title>Uses time picker above</title>
         <search>
-          <query>index=main  eventType="user.mfa.factor.activate" "outcome.result"="SUCCESS" | rex field="outcome.reason" "User set up (?&lt;factor&gt;.+) factor" |  eval myfactor=case(factor=="SIGNED_NONCE","OKTA_VERIFY",factor=="OKTA_VERIFY_PUSH","OKTA_VERIFY",factor=="OKTA_SOFT_TOKEN","OKTA_VERIFY",1=1,factor) | timechart count by myfactor</query>
+          <query>`okta_base_index`  eventType="user.mfa.factor.activate" "outcome.result"="SUCCESS" | rex field="outcome.reason" "User set up (?&lt;factor&gt;.+) factor" |  eval myfactor=case(factor=="SIGNED_NONCE","OKTA_VERIFY",factor=="OKTA_VERIFY_PUSH","OKTA_VERIFY",factor=="OKTA_SOFT_TOKEN","OKTA_VERIFY",1=1,factor) | timechart count by myfactor</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -235,7 +229,7 @@
       <map>
         <title>Uses time picker above</title>
         <search>
-          <query>index=main eventType="user.authentication.auth_via_mfa" | rename target{}.displayName as targetname |eval authenticator=mvindex(targetname, 1) | search authenticator!="Password" | geostats count latfield=client.geographicalContext.geolocation.lat longfield=client.geographicalContext.geolocation.lon by authenticator</query>
+          <query>`okta_base_index` eventType="user.authentication.auth_via_mfa" | rename target{}.displayName as targetname |eval authenticator=mvindex(targetname, 1) | search authenticator!="Password" | geostats count latfield=client.geographicalContext.geolocation.lat longfield=client.geographicalContext.geolocation.lon by authenticator</query>
           <earliest>$field1.earliest$</earliest>
           <latest>$field1.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -268,4 +262,4 @@
       </map>
     </panel>
   </row>
-</form>
+</dashboard>
