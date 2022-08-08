@@ -7,8 +7,7 @@ Download/Install from [splunkbase](https://splunkbase.splunk.com/app/3682/)
 7AUG2022
 --------
 
-I started building a number of "beta" dashboards into the app. Feel free to play with them, make sure you set "okta_base_index"
-macro to wherever your Okta TA is placing data.
+I started building a number of "beta" dashboards into the app. Feel free to play with them, make sure you set "okta_base_index" macro to wherever your Okta TA is placing data.
 
 1AUG2022
 --------
