@@ -162,6 +162,7 @@ release_note_date,smushed_event_type,format_event_type,legacy_event_types,admin_
 2017.01,appoffice365userdeletesuccess,app.office365.user.delete.success,app.office365.user.delete.success,0,0,Successfully deleted the Office 365 user.,app|office365-app
 2017.01,appoffice365userlifecycleactionfailed,app.office365.user.lifecycle.action.failed,app.office365.user.lifecycle.action.failed,0,0,Unable to complete app user lifecycle action for AppUser.,app|office365-app
 2017.01,appoffice365userremovelicensessuccess,app.office365.user.remove.licenses.success,app.office365.user.remove.licenses.success,0,0,Successfully removed all the licenses for the Office 365 user.,app|office365-app
+2022.08.0,apppolicysignonupdate,app.policy.sign_on.update,app.policy.sign_on.update,1,1,Update app sign on policy. This event is used to audit when an app sign on policy is updated. This event is fired when an admin updates an app's sign on policy and logs what was changed.,policy
 2017.01,appradiusagentlistenerfailed,app.radius.agent.listener.failed,app.radius.agent.listener.failed,0,0,Radius agent listener failed.,app|radius
 2018.13,appradiusagentlistenersucceeded,app.radius.agent.listener.succeeded,app.radius.agent.listener.succeeded,0,0,Radius agent listener succeeded.,app|radius
 2018.13,appradiusagentportinaccessible,app.radius.agent.port_inaccessible,app.radius.agent.port_inaccessible,0,0,Radius agent failed to listen on port.,app|radius
